@@ -1,10 +1,17 @@
 ---
-import { getCollection } from "astro:content";
+import BlogPost from "../components/BlogPost.astro";
 import { siteConfig } from "../config/site-config";
 import MainLayout from "../layouts/MainLayout.astro";
-import TypedBlogPost from "src/components/TypedBlogPost.astro";
 
-const blogPosts = await getCollection("blog");
+// Define the expected type for your post frontmatter and content
+type Post = {
+  frontmatter: Record<string, any>;
+  [key: string]: any;
+};
+
+const posts = Object.values(
+  import.meta.glob<Post>("./posts/*.{md,mdx}", { eager: true })
+);
 ---
 
 <MainLayout title="Cesc's blog">
@@ -18,7 +25,7 @@ const blogPosts = await getCollection("blog");
       </h1>
 
       <div class="grid grid-cols-1 gap-8 mt-8 md:mt-16 md:grid-cols-2">
-        {blogPosts.map((post) => <TypedBlogPost post={post} />)}
+        {posts.map((post) => <BlogPost {...post} />)}
       </div>
     </div>
   </section>
