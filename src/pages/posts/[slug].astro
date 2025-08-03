@@ -1,5 +1,8 @@
 ---
+import { Formatter } from "@utils/formatter";
 import type { GetStaticPaths } from "astro";
+import { Image } from "astro:assets";
+import { getEntry } from "astro:content";
 import { getCollection } from "astro:content";
 import BlogLayout from "src/layouts/BlogLayout.astro";
 
@@ -15,30 +18,55 @@ export const getStaticPaths = (async () => {
 const { post } = Astro.props;
 const frontmatter = post.data;
 
-const { Content, headings} = await post.render();
+const { Content, headings } = await post.render();
+const author = (await getEntry(frontmatter.author)).data;
 ---
 
 <BlogLayout title={post.data.title}>
   <h1 class="text-xs text-gray-500 mb-0">{frontmatter.title}</h1>
-  <h4 class="text-md text-gray-500 mb-0">{frontmatter.author}</h1>
+  <!-- <h4 class="text-md text-gray-500 mb-0">{frontmatter.author}</h1> -->
 
-     <h3>Tabla de contenidos</h3>
-     <ol>
-      {
-        headings.map((heading, index) =>(
-          <li>
-            <a href={`#${heading.slug}`}>
-              { index + 1 } - { heading.text }
-            </a>
-          </li>
-        ))
-      }
-     </ol>
+  <div class="text-lg text-gray-400 mb-0 flex flex-row mt-2">
+    <Image
+      src={author.avatar}
+      class="rounded-full"
+      alt={author.name}
+      width={50}
+      height={50}
+    />
 
-    <!-- Contenido -->
-     <Content />
+    <div class="flex flex-col ml-5">
+      <a class="text-blue-500" href=`/blog/${frontmatter.author.id}`>{author.name}</a>
+      <span class="text-xs text-gray-200">{Formatter.formatterDate(frontmatter.date)}</span>
+    </div>
+  </div>
 
-     <div class="my-20">
-      <a href="#btn-back">Ir arriba</a>
-     </div>
+  <Image
+    src={frontmatter.image}
+    alt={frontmatter.title}
+    width={600}
+    height={220}
+    class="object-cover w-full h-[250px] my-5 rounded-md"
+    transition:name={`${post.slug}-image`}
+  />
+
+  <h3>Tabla de contenidos</h3>
+  <ol>
+    {
+      headings.map((heading, index) => (
+        <li>
+          <a class="text-white" href={`#${heading.slug}`}>
+            {index + 1} - {heading.text}
+          </a>
+        </li>
+      ))
+    }
+  </ol>
+
+  <!-- Contenido -->
+  <Content />
+
+  <div class="my-20">
+    <a href="#btn-back" id="btn-back"> Ir arriba</a>
+  </div>
 </BlogLayout>
